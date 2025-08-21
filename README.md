@@ -61,19 +61,21 @@ bash run-dev-node.sh
 
 ### Step 2: Start the Frontend
 
-1. Navigate to the `nextjs` folder:
-   ```bash
-   cd ../../nextjs
-   ```
+Before running the frontend, you need to set the environment variables in the .env file.
 
-2. Install dependencies:
+```bash
+cd packages/nextjs
+cp .env.example .env
+```
+
+1. Install dependencies:
    ```bash
    yarn install
    ```
 
-3. Start the development server:
+2. Start the development server:
    ```bash
-   yarn dev
+   yarn run dev
    ```
 
 > The app will be available at [http://localhost:3000](http://localhost:3000) as shown below.
@@ -162,6 +164,33 @@ The guided interface helps you understand each step of the Uniswap V2 process. S
    - Verify that token amounts are properly formatted
    - For liquidity provision, make sure both tokens are approved first
 
+## 📊 Performance Tracking
+
+Before submitting your challenge, you can run the performance tracking script to analyze your application:
+
+1. **Navigate to the performance tracking directory:**
+
+   ```bash
+   cd packages/nextjs/services/web3
+   ```
+
+2. **Update the contract address:**
+   Open the `performanceTracking.js` file and paste the contract address that was deployed on your local node. (you can get contract address same as we have mentioned above in Docker_Img)
+
+3. **Run the performance tracking script:**
+   ```bash
+   node performanceTracking.js
+   ```
+
+This will provide insights about the savings when you cache your deployed contract. The output will show performance analysis similar to the image below:
+
+![image](https://raw.githubusercontent.com/purvik6062/speedrun_stylus/refs/heads/counter/assets/performance.png)
+
+> 📝 **Important**: Make sure to note down the **Latency Improvement** and **Gas Savings** values from the output, as you'll need to include these metrics when submitting your challenge.
+
+---
+
+
 ## Checkpoint 3: 🛠 Modify and Deploy Contracts
 
 You can modify the contract logic by editing files in the `packages/cargo-stylus/src` folder. After making changes, redeploy by running:
@@ -223,5 +252,92 @@ Replace `$deployment_tx` with your deployment transaction hash.
    - Educational tooltips explaining DeFi concepts
 
 Explore more challenges or contribute to this project!
+
+---
+
+## 🚀 Deploying to Arbitrum Sepolia
+
+If you want to deploy your Multisig Wallet contract to the Arbitrum Sepolia testnet, follow these steps:
+
+1. **Export your private key in the terminal**
+   ```bash
+   export PRIVATE_KEY=your_private_key_of_your_ethereum_wallet
+   ```
+
+2. **Run the Sepolia Deployment Script**
+   ```bash
+   cd packages/cargo-stylus/multisig_wallet
+   bash run-sepolia-deploy.sh
+   ```
+   This will deploy your contract to Arbitrum Sepolia and output the contract address and transaction hash.
+
+3. **Configure the Frontend for Sepolia**
+   - Go to the `packages/nextjs` directory:
+     ```bash
+     cd packages/nextjs
+     cp .env.example .env
+     ```
+   - Open the `.env` file and set the following variables:
+     ```env
+     NEXT_PUBLIC_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
+     NEXT_PUBLIC_PRIVATE_KEY=your_private_key_of_your_ethereum_wallet
+     ```
+     Replace `your_private_key_of_your_ethereum_wallet` with your actual Ethereum wallet private key (never share this key publicly).
+
+4. **Start the Frontend**
+   ```bash
+   yarn run dev
+   ```
+   Your frontend will now connect to the Arbitrum Sepolia network and interact with your deployed contract.
+
+
+---
+
+## ⚡️ Cache Your Deployed Contract for Faster, Cheaper Access
+
+> 📖 Contracts deployed on Arbitrum Sepolia can use this command for gas benefits, time savings, and cheaper contract function calls. Our backend will benchmark and place bids on your behalf to ensure your contract is not evicted from the CacheManager contract, fully automating this process for you.
+
+Before caching your contract, make sure you have installed the Smart Cache CLI globally:
+
+```bash
+npm install -g smart-cache-cli
+```
+
+After deploying your contract to Arbitrum Sepolia, you can cache your contract address using the `smart-cache` CLI. Caching your contract enables:
+- 🚀 **Faster contract function calls** by reducing lookup time
+- 💸 **Cheaper interactions** by optimizing access to contract data
+- 🌐 **Seamless access** to your contract from any environment or system
+
+> 💡 **Info:** Both the `<address>` and `--deployed-by` flags are **mandatory** when adding a contract to the cache.
+
+### 📝 Simple Example
+
+```bash
+smart-cache add <CONTRACT_ADDRESS> --deployed-by <YOUR_WALLET_ADDRESS_WITH_WHOM_YOU_HAVE_DEPLOYED_CONTRACT>
+```
+
+### 🛠️ Advanced Example
+
+```bash
+smart-cache add 0xYourContractAddress \
+  --deployed-by 0xYourWalletAddress \
+  --network arbitrum-sepolia \
+  --tx-hash 0xYourDeploymentTxHash \
+  --name "YourContractName" \
+  --version "1.0.0"
+```
+
+- `<CONTRACT_ADDRESS>`: The address of your deployed contract (**required**)
+- `--deployed-by`: The wallet address you used to deploy the contract (**required**)
+- `--network arbitrum-sepolia`: By default, contracts are cached for the Arbitrum Sepolia network for optimal benchmarking and compatibility
+- `--tx-hash`, `--name`, `--version`: Optional metadata for better organization
+
+> ⚠️ **Warning:** If you omit the required fields, the command will not work as expected.
+
+> 💡 For more options, run `smart-cache add --help`.
+
+For more in-depth details and the latest updates, visit the [smart-cache-cli package on npmjs.com](https://www.npmjs.com/package/smart-cache-cli).
+
+---
 
 > 🏃 Head to your next challenge [here](https://speedrunstylus.com/challenge/zkp-age).
